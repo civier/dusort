@@ -12,13 +12,20 @@
 #    Note: if wants to sort by level, might be easier to use tree --du, but difficult to know if it works, because it prints out the tree only when finished!
 #######################
 
-# replaces / with -
+if [ $# -ne 2 ]
+  then
+    echo 'dusort: wrong number of arguments provided'
+    echo 'Usage: dusort ADMIN PATH'
+  exit
+fi
 
+# get real paths and convert / to -
+PATH_DASH=$(realpath $2 | sed 's/\//-/g')
 
 # log file name
 LOG_FILE=${HOME}'/du_'${PATH_DASH}'_from_'$1'.txt'
 
+# run the command
 screen bash -c 'echo enter password for '$1'; '\
 'su '$1' -c "du -h '$2'" |& tee '${LOG_FILE}'; '\
 'sort -rh '${LOG_FILE}'; > sort -rh '${LOG_FILE}'_sorted.txt;'
-
