@@ -27,5 +27,5 @@ LOG_FILE=${HOME}'/DU_'${PATH_DASH}'_FROM_'$1'_AT_'$(date -Iseconds)
 
 # run the command
 screen bash -c 'echo enter password for '$1'; '\
-'su '$1' -c "du -h '$2'" |& tee '${LOG_FILE}'.txt; '\
-'sort -rh '${LOG_FILE}'.txt; > sort -rh '${LOG_FILE}'_sorted.txt;'
+'su '$1' -c "cd '$2'; du -h ." |& tee '${LOG_FILE}'.txt; '\
+'sort -rh '${LOG_FILE}'.txt > '${LOG_FILE}'_sorted.txt;'
