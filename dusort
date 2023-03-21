@@ -10,6 +10,7 @@
 #     PATH - path to tree that should be interogated
 #
 #    Note: if wants to sort by level, might be easier to use tree --du, but difficult to know if it works, because it prints out the tree only when finished!
+#          dusort excludes files on other file systems
 #
 #    Author: Oren Civier
 #
@@ -32,5 +33,5 @@ LOG_FILE=${HOME}'/DU_'${PATH_DASH}'_FROM_'$1'_AT_'$(date -Iseconds)
 
 # run the command
 screen bash -c 'echo enter password for '$1'; '\
-'sudo -u '$1' cd '$2'; du -h . |& tee '${LOG_FILE}'.txt; '\
+'sudo -u '$1' cd '$2'; du -xh . |& tee '${LOG_FILE}'.txt; '\
 'sort -rh '${LOG_FILE}'.txt > '${LOG_FILE}'_sorted.txt;'
