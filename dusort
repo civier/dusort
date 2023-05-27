@@ -7,7 +7,7 @@
 #    Usage: dusort PATH [ USER FLAGS ]
 #
 #     PATH - path to tree that should be interogated
-#     USER (optional) - admin user that can read all users' files
+#     USER (optional) - user to switch to when executing the du command
 #     FLAGS (optional) - flags to provide to du
 #
 #    Note: if wants to sort by level, might be easier to use tree --du, but difficult to know if it works, because it prints out the tree only when finished!
