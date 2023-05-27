@@ -4,10 +4,11 @@
 #   ------
 #   Run du with an admin user and sort the output. Everything is done within screen, so won't halt on network disconnection
 #
-#    Usage: dusort ADMIN PATH
+#    Usage: dusort PATH [ USER FLAGS ]
 #
-#     ADMIN - admin user that can read all users' files
 #     PATH - path to tree that should be interogated
+#     USER (optional) - admin user that can read all users' files
+#     FLAGS (optional) - flags to provide to du
 #
 #    Note: if wants to sort by level, might be easier to use tree --du, but difficult to know if it works, because it prints out the tree only when finished!
 #          dusort excludes files on other file systems
@@ -18,20 +19,40 @@
 #                     a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University.
 #######################
 
-if [ $# -ne 2 ]
+if [ $# -lt 1 ]
   then
     echo 'dusort: wrong number of arguments provided'
-    echo 'Usage: dusort ADMIN PATH'
+    echo 'Usage: dusort PATH USER FLAGS'
   exit
 fi
 
 # get real paths and convert / to -
-PATH_DASH=$(realpath $2 | sed 's/\//-/g')
+PATH_DASH=$(realpath $1 | sed 's/\//-/g')
+FLAGS_DASH=$(echo $3 | sed 's/\//-/g')
+
+real_user=$(whoami)
+
+# check if USER is the actual user
+if [ $# -eq 1 ] || [ "$2" = "$real_user" ]
+then
+	user_str="$real_user"
+	pwd_str=''
+	sudo_str=''
+else
+	user_str=$2
+	pwd_str='echo enter password for '"$2"':; '
+	sudo_str='sudo -u '"$2"
+fi
 
 # log file name
-LOG_FILE=${HOME}'/DU_'${PATH_DASH}'_FROM_'$1'_AT_'$(date -Iseconds)
+LOG_FILE=${HOME}'/DU'"$FLAGS_DASH"'_'${PATH_DASH}'_FROM_'"$user_str"'_AT_'$(date -Iseconds)
 
 # run the command
-screen bash -c 'echo enter password for '$1'; '\
-'sudo -u '$1' cd '$2'; du -xh . |& tee '${LOG_FILE}'.txt; '\
+cmd="$pwd_str"\
+"$sudo_str"' cd '"$1"'; du -xh '"$3"' . |& tee '${LOG_FILE}'.txt; '\
 'sort -rh '${LOG_FILE}'.txt > '${LOG_FILE}'_sorted.txt;'
+
+echo 'run the following command using "screen bash -c ":'
+echo "$cmd"
+
+screen bash -c "$cmd"
