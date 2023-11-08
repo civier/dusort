@@ -1,6 +1,6 @@
 
-   dusort
-   ------
+   **dusort**
+   
    Run du with an admin user and sort the output. Everything is done within screen, so won't halt on network disconnection
 
     Usage: dusort PATH [ USER FLAGS ]
