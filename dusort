@@ -2,21 +2,24 @@
 #
 #   dusort
 #   ------
-#   Run du with an admin user and sort the output. Everything is done within screen, so won't halt on network disconnection
+#   Run du in a detached terminal (i.e., network disruptions resistent) and sort the output.
 #
 #    Usage: dusort PATH [ USER FLAGS ]
 #
 #     PATH - path to tree that should be interogated
 #     USER (optional) - user to switch to when executing the du command (if the current user is mentioned, no switch will be done)
-#     FLAGS (optional) - flags to provide to du
+#     FLAGS (optional) - flags to provide to du (e.g., '--inodes' indicates to count number of files rather than calculate volume)
 #
-#    Note: if wants to sort by level, might be easier to use tree --du, but difficult to know if it works, because it prints out the tree only when finished!
-#          dusort excludes files on other file systems
+#    Note: * dusort prints error code. If error code is non-zero, run 'grep ^du: LOGFILE.txt' to display the the error messages.
+#          * dusort excludes files on other file systems
+#          * to sort by level in the hierarchy, might be easier to use tree --du, but beware that errors, if any (e.g., unaccessible files), will only be evident when the command finishes executing. 
+#	     Unfortunately, 'tree --du' does not provide any feedback throughout execution.
 #
 #    Author: Oren Civier
 #
 #    Acknowledgments: The author acknowledge the facilities and scientific and technical assistance of the National Imaging Facility, 
 #                     a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University.
+#
 #######################
 
 if [ $# -lt 1 ]
@@ -45,14 +48,20 @@ else
 fi
 
 # log file name
-LOG_FILE=${HOME}'/DU'"$FLAGS_DASH"'_'${PATH_DASH}'_FROM_'"$user_str"'_AT_'$(date -Iseconds)
+LOG_FILE="$HOME"'/DU'"$FLAGS_DASH"'_'"$PATH_DASH"'_FROM_'"$user_str"'_AT_'$(date -Iseconds)
 
-# run the command
-cmd="$pwd_str"\
-"$sudo_str"' cd '"$1"'; du -xh '"$3"' . |& tee '${LOG_FILE}'.txt; '\
-'sort -rh '${LOG_FILE}'.txt > '${LOG_FILE}'_sorted.txt;'
+# run the command, and save output sorted and unsorted. Also include the error code
+cmd='set -uo pipefail; '\
+'shopt -s failglob lastpipe; '\
+"$pwd_str"\
+"$sudo_str"' cd '"$1"' && du -xh '"$3"' . |& tee '"$LOG_FILE"'.txt; '\
+'exit_code=$?; '\
+'echo EXIT CODE: $exit_code > '"$LOG_FILE"'_sorted.txt; '\
+'sort -rh '"$LOG_FILE"'.txt >> '"$LOG_FILE"'_sorted.txt; '\
+'echo EXIT CODE: $exit_code >> '"$LOG_FILE"'.txt; '
 
 echo 'run the following command using "screen bash -c ":'
 echo "$cmd"
 
-screen bash -c "$cmd"
+# run command in a detached terminal and wait for input so user can see error message, if any
+screen bash -c \("$cmd"\)'; echo "press ENTER to continue"; read'
