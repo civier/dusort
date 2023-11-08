@@ -2,7 +2,7 @@
 
    dusort
    ------
-   Run du in a detached terminal (i.e., network disruptions resistent) and sort the output.
+   Run du in a detached terminal (i.e. resister to network disruptions) and sort the output.
 
     Usage: dusort PATH [ USER FLAGS ]
 
